@@ -22,6 +22,7 @@ import utils
 import matplotlib.pyplot as plt
 import stimer
 from telebot.types import InputFile, ForceReply
+import holidays
 
 firsthour = 5
 
@@ -61,6 +62,7 @@ def make_plot(studio_id):
     studio_name = studios.get(str(studio_id), 'Unknown Studio')
 
     now = datetime.datetime.now()
+    de_holidays = holidays.Germany()
 
     df = pd.read_csv(csv_file, sep=';', names=['members', 'max'])
     df.members = df.members.convert_dtypes()
@@ -71,12 +73,24 @@ def make_plot(studio_id):
     df[df.members==-1] = np.nan
     df.index = pd.to_datetime(df.index, format='ISO8601').round('5min')
     df = df[~df.index.duplicated()]
-    df = df.reindex(pd.date_range(start=df.index.max()-timedelta(weeks=7),
+    df = df.reindex(pd.date_range(start=df.index.min(),
                                   end=df.index.max(),
                                   freq='5min'))
     df = df.astype(float).interpolate(method='linear')
 
-    df_4week = df.loc[df.index > now-timedelta(days=7*4)]  # last four weeks
+    if now.date() in de_holidays:
+        holiday_name = de_holidays.get(now.date())
+        holiday_dates = []
+        for year in range(now.year - 1, now.year - 5, -1):
+            try:
+                holiday_dates.extend([d for d, n in holidays.Germany(years=year).items() if n == holiday_name])
+            except KeyError:
+                pass
+        
+        df_4week = df[df.index.date.isin(holiday_dates)]
+    else:
+        df_4week = df.loc[df.index > now-timedelta(days=7*4)]  # last four weeks
+
     week_avg = df_4week.groupby((df_4week.index.dayofweek) * 24 +
                                 (df_4week.index.hour)).mean().rename_axis('HourOfWeek')
     week_avg = week_avg.reindex(np.arange(168), fill_value=np.nan)

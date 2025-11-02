@@ -17,7 +17,7 @@ from logging.handlers import RotatingFileHandler
 import utils
 import plotting
 from utils import forward_exception
-from polling import MemberCountPoller, get_checked_in_users, get_ids
+from polling import get_checked_in_users, get_ids
 from templates import TEMPLATE_HELP, TEMPLATE_SUPPORT, TEMPLATE_NO_GROUP
 from templates import TEMPLATE_STATUS, TEMPLATE_NEW_STUDIO
 from templates import format_user
@@ -241,8 +241,7 @@ if __name__=='__main__':
         # telebot.types.BotCommand("/status", "Zeige deine Einstellungen"),
         telebot.types.BotCommand("/help", "Zeige alle Bot-Befehle"),
     ])
-    counter = MemberCountPoller()
-    counter.start()
+
 
     try:
         print('Starting loop. Loop running...')

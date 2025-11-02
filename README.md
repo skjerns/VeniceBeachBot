@@ -33,9 +33,12 @@ Create a `settings.json` file in the root directory of the project with the foll
     "admin": "YOUR_TELEGRAM_USER_ID",
     "email": "YOUR_ACTINATE_EMAIL",
     "password": "YOUR_ACTINATE_PASSWORD",
-    "client_secret": "YOUR_ACTINATE_CLIENT_SECRET"
+    "client_secret": "YOUR_ACTINATE_CLIENT_SECRET",
+    "polling": false
 }
 ```
+
+The `polling` setting can be set to `true` or `false`. If set to `false`, the bot will not poll the Actinate API for live data and will instead use the historical data from the CSV files to generate the graphs. This is useful if you no longer have access to the Actinate API but still want to use the bot with your historical data.
 
 ## Example
 
