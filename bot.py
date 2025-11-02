@@ -124,8 +124,9 @@ def command_request_support(message):
 def command_graph(message):
     utils.update_user(message)
     user = utils.load_user(message.from_user)
-    studio_id = user.get('studio', None)
-    if studio_id is None:
+    try:
+        studio_id = user['studio']
+    except KeyError:
         bot.reply_to(message, "Keine Studio-ID eingestellt.")
         reply = get_formatted_studios()
         bot.reply_to(message, reply)
