@@ -108,28 +108,27 @@ def make_plot(studio_id):
 
 
 
-    if now.date() in de_holidays:
+    settings = utils.load_settings()
 
+    polling = settings.get('polling', True)
+
+
+
+    if not polling:
+        # Use data from the previous year for the 4-week average heatmap
+        last_year_start = now - timedelta(days=365 + 7*4)
+        last_year_end = now - timedelta(days=365)
+        df_4week = df.loc[(df.index > last_year_start) & (df.index < last_year_end)]
+    elif now.date() in de_holidays:
         holiday_name = de_holidays.get(now.date())
-
         holiday_dates = []
-
         for year in range(now.year - 1, now.year - 5, -1):
-
             try:
-
                 holiday_dates.extend([d for d, n in holidays.Germany(years=year).items() if n == holiday_name])
-
             except KeyError:
-
                 pass
-
-        
-
         df_4week = df[df.index.date.isin(holiday_dates)]
-
     else:
-
         df_4week = df.loc[df.index > now-timedelta(days=7*4)]  # last four weeks
 
 
@@ -200,7 +199,13 @@ def make_plot(studio_id):
 
 
 
-    df_lastweek = df.loc[df.index > now-timedelta(days=7)] # this is the last week
+    if not polling:
+        # Use data from the previous year for the last week heatmap
+        last_year_date_start = now - timedelta(days=365 + 7)
+        last_year_date_end = now - timedelta(days=365)
+        df_lastweek = df.loc[(df.index > last_year_date_start) & (df.index < last_year_date_end)]
+    else:
+        df_lastweek = df.loc[df.index > now-timedelta(days=7)] # this is the last week
 
     lastweek_avg = df_lastweek.groupby((df_lastweek.index.dayofweek) * 24 + (df_lastweek.index.hour)).mean().rename_axis('HourOfWeek')
 
@@ -245,12 +250,6 @@ def make_plot(studio_id):
     ######  plot today and forecast
 
     plt.subplot(3, 1, 3)
-
-
-
-    settings = utils.load_settings()
-
-    polling = settings.get('polling', True)
 
 
 
